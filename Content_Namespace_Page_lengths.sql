@@ -1,5 +1,5 @@
 SELECT 
-    page_title, -- Retrives the little of the pager
+    page_title, -- Retrives the title of the pager
     page_len    -- Retrives the length of the page in bytes
 FROM 
     page 
