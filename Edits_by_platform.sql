@@ -4,8 +4,9 @@ SELECT
     	WHEN ctd.ctd_name IN ('visual editor', 'visualeditor-wikitext', 'wikieditor') THEN 'desktop'
         WHEN ctd.ctd_name = 'mobile web edit' THEN 'mobile web'
         WHEN ctd.ctd_name IN ('mobile app edit', 'android app edit', 'ios app edit', 'advanced app edit') THEN 'mobile app'
+	ELSE 'other'
     END AS platform,
-    COUNT(r.rev_id) AS edit_count   -- Count number of edits per platform
+    COUNT(DISTINCT r.rev_id) AS edit_count   -- Count number of edits per platform
 FROM 
 	change_tag ct
 JOIN 
