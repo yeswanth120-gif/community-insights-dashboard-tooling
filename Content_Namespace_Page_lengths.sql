@@ -1,9 +1,12 @@
 SELECT 
-    page_title, -- Retrives the title of the pager
-    page_len    -- Retrives the length of the page in bytes
+    p.page_title, -- Retrives the title of the page
+    p.page_len    -- Retrives the length of the page in bytes
 FROM 
-    page 
+    page p
+JOIN 
+    revision r ON r.rev_page = p.page_id    
 WHERE 
-    page_namespace = 0  --Filters results to include only pages in the main namespace
-
-LIMIT 25;
+    p.page_namespace = 0  -- include only pages in the main namespace
+    AND r.rev_timestamp >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 5 YEAR), '%Y%m%d%H%i%S')
+GROUP BY 
+    p.page_title, p.page_len;
