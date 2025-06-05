@@ -1,8 +1,9 @@
 -- Counting the number of actors in different contribution buckets
-SELECT COUNT(*), bucket 
-FROM (
-    -- Subquery: Categorizing actors based on the number of revisions they made
-    SELECT rev_actor,
+WITH revision_buckets AS (  --A CTE using WITH
+    SELECT COUNT(*), bucket 
+    FROM (
+        -- Subquery: Categorizing actors based on the number of revisions they made
+        SELECT rev_actor,
         CASE 
             WHEN COUNT(rev_id) = 0 THEN '0'               -- No revisions
             WHEN COUNT(rev_id) BETWEEN 1 AND 5 THEN '1-5' -- Between 1 and 5 revisions
@@ -11,7 +12,13 @@ FROM (
             WHEN COUNT(rev_id) BETWEEN 1000 AND 4999 THEN '1000-4999' -- Between 1000 and 4999 revisions
             ELSE '5000+' -- More than 5000 revisions
         END AS bucket
-    FROM revision
-    GROUP BY rev_actor -- Grouping by actor to count their revisions
-) AS sub_query
-GROUP BY bucket; -- Counting the number of actors in each bucket
+        FROM revision
+        GROUP BY rev_actor -- Grouping by actor to count their revisions
+    )
+
+SELECT 
+    bucket,
+    COUNT(*) AS number_of_editors   -- Counting the number of actors in each bucket
+FROM revision_buckets
+GROUP BY bucket
+ORDER BY bucket;
