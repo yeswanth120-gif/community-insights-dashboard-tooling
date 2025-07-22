@@ -1,16 +1,15 @@
-
-/* For getting deleted edits we use archieve table 
-   For getting reverted or rollback edits we use comment table in that comment_text contains the strings revert or rollback */
-
-SELECT 
-    (SELECT COUNT(*) 
-     FROM archive -- For deleted edits we use archieve table 
-     WHERE LEFT(ar_timestamp, 8) BETWEEN '20230301' AND '20231212') AS deleted_edits,  -- Filtering between specific dates 
-
-    (SELECT COUNT(*) 
-     FROM revision r -- For reverted or rollback edits we use comment table
-     JOIN comment c ON r.rev_comment_id = c.comment_id
-     WHERE LEFT(r.rev_timestamp, 8) BETWEEN '20230301' AND '20231212' -- Filtering between specific dates 
-       AND (c.comment_text LIKE '%revert%' 
-         OR c.comment_text LIKE '%rollback%' 
-         OR c.comment_text LIKE '%undid%')) AS reverted_edits; -- Comparing strings i.e revert or rollback with column comment_text
+SELECT
+    DATE(r.rev_timestamp) AS Edit_Date,              -- Extracts the date for dashboard filtering
+    COUNT(DISTINCT r.rev_id) AS reverted_edits       -- Counts the number of unique reverted edits
+FROM
+    revision AS r
+JOIN
+    change_tag AS ct ON r.rev_id = ct.ct_rev_id      -- Links revisions to their associated tags
+JOIN
+    change_tag_def AS ctd ON ct.ct_tag_id = ctd.ctd_id -- Gets the name of the tag
+WHERE
+    ctd.ctd_name IN ('mw-reverted', 'mw-rollback', 'mw-undo') -- Filters for specific revert, rollback, and undo tags
+GROUP BY
+    Edit_Date                                        -- Groups the daily counts
+ORDER BY
+    Edit_Date;                                       -- Sorts the results chronologically
