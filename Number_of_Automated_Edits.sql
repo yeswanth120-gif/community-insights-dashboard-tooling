@@ -1,15 +1,15 @@
-/* Retrieving Number of Automated edits done i.e ( Edits done by the bots) , 
-For that we need Revision , actor , user_group tables to get the data . 
-Revision table stores the edits done in database and 
-Actor table shows the edit done by whom (user or bot)  and 
-to conform edit done by bot we use user_group table in which 
-ug_group contains values like : 'bot', 'bureaucrat', 'sysop... */
-
-SELECT COUNT(*) AS Automated_Edits                   -- Count the number of automated edits
-FROM revision                                        -- Refer to the revision table
-JOIN actor 
-    ON revision.rev_actor = actor.actor_id           -- Join actor and revision tables
-JOIN user_groups 
-    ON actor.actor_user = user_groups.ug_user        -- Join user_groups and actor tables
-WHERE user_groups.ug_group = 'bot'                   -- Filter for bot user group
-  AND revision.rev_timestamp BETWEEN '20230101' AND '20240301';  -- Filter by specific date range
+SELECT
+    DATE(r.rev_timestamp) AS Edit_Date,              -- Extract the date for filtering on the dashboard
+    COUNT(DISTINCT r.rev_id) AS Automated_Edits      -- Count distinct edits to avoid duplicates
+FROM
+    revision AS r
+JOIN
+    actor AS a ON r.rev_actor = a.actor_id           -- Join to identify the editor (actor)
+JOIN
+    user_groups AS ug ON a.actor_user = ug.ug_user   -- Join to access user group information
+WHERE
+    ug.ug_group = 'bot'                              -- Filter for edits made only by bots
+GROUP BY
+    Edit_Date                                        -- Group results by date
+ORDER BY
+    Edit_Date;                                       -- Sort the results chronologically
