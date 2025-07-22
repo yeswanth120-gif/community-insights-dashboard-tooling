@@ -1,12 +1,9 @@
-/* For getting number of edits we use revision table 
-   For getting number of deleted pages we use archieve table 
-   Used timestamp for filtering between specific dates */
-
-SELECT 
-    (SELECT COUNT(*) 
-     FROM revision -- For edits we use revision table 
-     WHERE LEFT(rev_timestamp, 8) BETWEEN '20240101' AND '20240301') AS total_edits, -- Filtered between specific dates
-     
-    (SELECT COUNT(*) 
-     FROM archive -- For deleted pages we use archive tale 
-     WHERE LEFT(ar_timestamp, 8) BETWEEN '20240101' AND '20240301') AS deleted_pages; -- Filtered between specific dates 
+SELECT
+    DATE(ar_timestamp) AS Deletion_Date,             -- Extracts the date for dashboard filtering
+    COUNT(ar_id) AS deleted_pages                    -- Counts the number of deleted pages per day
+FROM
+    archive                                          -- Table containing records of deleted pages
+GROUP BY
+    Deletion_Date                                    -- Groups the counts by day
+ORDER BY
+    Deletion_Date;                                   -- Sorts the results by date
